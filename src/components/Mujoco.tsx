@@ -1,121 +1,134 @@
-import { memo, useEffect, useRef, useState } from "react";
-
-import * as THREE from "three";
+/**
+ * src/components/Mujoco.tsx
+ *
+ * Loads MuJoCo WASM, builds the Three.js scene, steps the simulation,
+ * and calls `onLoad(simulation, model)` once everything is ready.
+ */
 
 import { useFrame, useThree } from "@react-three/fiber";
+import { memo, useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 
-import { UpdateProps } from "./UpdateProps";
 import { MujocoContainer } from "./MujocoContainer";
 import {
-  loadMujocoModule,
   buildThreeScene,
-  updateThreeScene,
-  loadMujocoScene
+  loadMujocoModule,
+  loadMujocoScene,
+  updateThreeScene
 } from "./mujocoUtils";
+import { UpdateProps } from "./UpdateProps";
 
-export interface MujocoProps {
+// —— Import only the types we need from the WASM typings ——
+// (These are “type only” imports: they do not become runtime code)
+import type { Model, Simulation } from "../wasm/mujoco_wasm";
+
+interface MujocoProps {
   sceneUrl: string;
+  /**
+   * Called once the MuJoCo model+state+simulation have been created
+   * and the Three.js scene has been built. We only need to pass sim+model
+   * to App.tsx so it can wire up the sliders.
+   */
+  onLoad?: (sim: Simulation, model: Model) => void;
 }
 
-export const MujocoComponent = ({ sceneUrl }: MujocoProps) => {
-  // The 35ms threshold acts as a safeguard to prevent the simulation from
-  // accumulating too much lag, which could degrade performance or accuracy.
+export const MujocoComponent: React.FC<MujocoProps> = ({ sceneUrl, onLoad }) => {
+  // If real time lags too far behind sim time, clamp it here
   const MAX_SIMULATION_LAG_MS = 35.0;
 
   const { scene } = useThree();
 
-  // This is to block the scene rendering until the scene has been loaded.
+  // Prevent stepping or rendering if we’re still loading
   const loadingSceneRef = useRef<boolean>(false);
-
-  // True if the scene fails to load.
   const errorRef = useRef<boolean>(false);
 
-  // Variables used to update the ThreeJS scene.
+  // Used for stepping the simulation
   const mujocoTimeRef = useRef(0);
   const updatePropsRef = useRef<UpdateProps>();
   const tmpVecRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
 
-  // The container of the MuJoCo module, model, state and simulation.
+  // Holds the wrapper that contains WASM Module, Model, State, Simulation
   const [mujocoContainer, setMujocoContainer] = useState<MujocoContainer | null>(null);
 
-  // Load MuJoCo WASM with a default empty scene when the component mounts.
+  // 1. Load the MuJoCo WASM module once on mount
   useEffect(() => {
     const setupMujocoModule = async () => {
       try {
-        const mujocoContainer = await loadMujocoModule();
-        if (mujocoContainer) {
-          setMujocoContainer(mujocoContainer);
+        const container = await loadMujocoModule();
+        if (container) {
+          setMujocoContainer(container);
         }
-      } catch (error: unknown) {
+      } catch (err) {
         errorRef.current = true;
-        console.error(error);
+        console.error("Failed to load MuJoCo WASM:", err);
       }
     };
     setupMujocoModule();
   }, []);
 
-  // Load a scene each time the scene URL changes.
+  // 2. Whenever the sceneUrl or the container changes, load that MJCF into MuJoCo
   useEffect(() => {
+    if (!mujocoContainer) return;
+
     const setupMujocoScene = async () => {
       try {
-        if (mujocoContainer) {
-          // Time-consuming operation that should be moved into a Worker.
-          loadMujocoScene(mujocoContainer, sceneUrl);
+        // 2.a. Load the MJCF file (this writes it into the virtual filesystem)
+        loadMujocoScene(mujocoContainer, sceneUrl);
 
-          updatePropsRef.current = await buildThreeScene(mujocoContainer, scene);
+        // 2.b. Build the Three.js objects (meshes, materials, etc.)
+        updatePropsRef.current = await buildThreeScene(mujocoContainer, scene);
+
+        // 2.c. Once the Three.js scene is built, notify parent via onLoad
+        if (onLoad) {
+          const sim = mujocoContainer.getSimulation();
+          const mdl = sim.model();
+          onLoad(sim, mdl);
         }
-      } catch (error: unknown) {
+      } catch (err) {
         errorRef.current = true;
-        console.error(error);
+        console.error("Failed to load Mujoco scene:", err);
       }
     };
-    if (mujocoContainer) {
-      try {
-        loadingSceneRef.current = true;
-        setupMujocoScene();
-      } finally {
-        loadingSceneRef.current = false;
-      }
-    }
-  }, [mujocoContainer, scene, sceneUrl]);
 
-  // Update the Three.js scene with information from the MuJoCo simulation.
+    loadingSceneRef.current = true;
+    setupMujocoScene()
+      .finally(() => {
+        loadingSceneRef.current = false;
+      });
+  }, [mujocoContainer, scene, sceneUrl, onLoad]);
+
+  // 3. Every frame: step the simulation and update Three.js transforms
   useFrame(({ clock }) => {
     if (!mujocoContainer || loadingSceneRef.current || errorRef.current) {
       return;
     }
 
-    const simulation = mujocoContainer.getSimulation();
-    const model = simulation.model();
-    if (!model || !simulation) {
+    const sim = mujocoContainer.getSimulation();
+    const mdl = sim.model();
+    if (!mdl || !sim) {
       return;
     }
 
     const timeMS = clock.getElapsedTime() * 1000;
-    const timestep = model.getOptions().timestep;
+    const timestep = mdl.getOptions().timestep;
 
-    // If the real elapsed time (timeMS) has advanced more than 35 milliseconds
-    // beyond the simulation's current time, the simulation time is reset to
-    // match the real time. This prevents the simulation from falling too far
-    // behind real time, which could happen if the rendering or simulation steps lag.
+    // Clamp if too far behind
     if (timeMS - mujocoTimeRef.current > MAX_SIMULATION_LAG_MS) {
       mujocoTimeRef.current = timeMS;
     }
-    // This while loop ensures that the simulation progresses in fixed timesteps
-    // until it catches up with the real elapsed time.
+
+    // Step until sim time catches up to real time
     while (mujocoTimeRef.current < timeMS) {
-      simulation.step();
+      sim.step();
       mujocoTimeRef.current += timestep * 1000;
     }
 
-    if (!updatePropsRef.current) {
-      return;
-    }
+    if (!updatePropsRef.current) return;
     updateThreeScene(mujocoContainer, updatePropsRef.current, tmpVecRef.current);
   });
 
-  return null; // This component doesn't render anything directly.
+  // This component does not render DOM—everything is in Three.js
+  return null;
 };
 
-// Memoize the named component
 export const Mujoco = memo(MujocoComponent);

@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import load_mujoco, { MujocoModule } from "../wasm/mujoco_wasm";
 import { mjtGeom } from "../wasm/mujoco_model_enums";
+import load_mujoco, { MujocoModule } from "../wasm/mujoco_wasm";
 import { MujocoContainer } from "./MujocoContainer";
 import { UpdateProps } from "./UpdateProps";
 import { createMirrotCheckerboard } from "./threeUtils";
@@ -143,121 +143,67 @@ const decode = (buffer: ArrayBufferLike, length: number, byteOffset: number, byt
  * @returns A promise that resolves when all assets have been copied.
  * @throws Throws an error if fetching or writing any file fails.
  */
+
+/***
+ * 
+ * 
+ * 10mm_ball.part  injection_big_lens.part    magnet.part                 pp00670_front_shell_a2.part     reachy_mini_head.part  small_lens_30mm.part
+10mm_ball.stl   injection_big_lens.stl     magnet.stl                  pp00670_front_shell_a2.stl      reachy_mini_head.stl   small_lens_30mm.stl
+base_bot.part   injection_small_lens.part  mp00663_neck_a2.part        pp00671_monocle_a2.part         right_arm.part         std00609_ed_lens_m12.part
+base_bot.stl    injection_small_lens.stl   mp00663_neck_a2.stl         pp00671_monocle_a2.stl          right_arm.stl          std00609_ed_lens_m12.stl
+base_side.part  large_lens_42mm.part       mp00664_back_sheet_a3.part  pp00672_antenna_mic_a1.part     rod.part
+base_side.stl   large_lens_42mm.stl        mp00664_back_sheet_a3.stl   pp00672_antenna_mic_a1.stl      rod.stl
+base_top.part   left_arm.part              platform.part               pp00673_antenna_sphere_a1.part  simplified_xl330.part
+base_top.stl    left_arm.stl               platform.stl                pp00673_antenna_sphere_a1.stl   simplified_xl330.stl
+ * 
+ */
 const copyMujocoModuleAssets = async (mujocoModule: MujocoModule) => {
   const allFiles = [
-    "22_humanoids.xml",
-    "adhesion.xml",
-    "agility_cassie/assets/achilles-rod.obj",
-    "agility_cassie/assets/cassie-texture.png",
-    "agility_cassie/assets/foot-crank.obj",
-    "agility_cassie/assets/foot.obj",
-    "agility_cassie/assets/heel-spring.obj",
-    "agility_cassie/assets/hip-pitch.obj",
-    "agility_cassie/assets/hip-roll.obj",
-    "agility_cassie/assets/hip-yaw.obj",
-    "agility_cassie/assets/knee-spring.obj",
-    "agility_cassie/assets/knee.obj",
-    "agility_cassie/assets/pelvis.obj",
-    "agility_cassie/assets/plantar-rod.obj",
-    "agility_cassie/assets/shin.obj",
-    "agility_cassie/assets/tarsus.obj",
-    "agility_cassie/cassie.xml",
-    "agility_cassie/scene.xml",
-    "arm26.xml",
-    "balloons/balloons.xml",
-    "car.xml",
-    "empty.xml",
-    "hammock.xml",
-    "humanoid.xml",
-    "humanoid_body.xml",
-    "mug/mug.obj",
-    "mug/mug.png",
-    "mug/mug.xml",
-    "scene.xml",
-    "shadow_hand/assets/f_distal_pst.obj",
-    "shadow_hand/assets/f_knuckle.obj",
-    "shadow_hand/assets/f_middle.obj",
-    "shadow_hand/assets/f_proximal.obj",
-    "shadow_hand/assets/forearm_0.obj",
-    "shadow_hand/assets/forearm_1.obj",
-    "shadow_hand/assets/forearm_collision.obj",
-    "shadow_hand/assets/lf_metacarpal.obj",
-    "shadow_hand/assets/mounting_plate.obj",
-    "shadow_hand/assets/palm.obj",
-    "shadow_hand/assets/th_distal_pst.obj",
-    "shadow_hand/assets/th_middle.obj",
-    "shadow_hand/assets/th_proximal.obj",
-    "shadow_hand/assets/wrist.obj",
-    "shadow_hand/left_hand.xml",
-    "shadow_hand/right_hand.xml",
-    "shadow_hand/scene_left.xml",
-    "shadow_hand/scene_right.xml",
-    "simple.xml",
-    "slider_crank.xml",
-    "model_with_tendon.xml",
-    "spot/meshes/arm/collision/arm_link_el0.obj",
-    "spot/meshes/arm/collision/arm_link_el1_lip.obj",
-    "spot/meshes/arm/collision/arm_link_el1_main.obj",
-    "spot/meshes/arm/collision/arm_link_sh0_base.obj",
-    "spot/meshes/arm/collision/arm_link_sh0_left_motor.obj",
-    "spot/meshes/arm/collision/arm_link_sh0_right_motor.obj",
-    "spot/meshes/arm/collision/arm_link_sh1.obj",
-    "spot/meshes/arm/collision/arm_link_wr0.obj",
-    "spot/meshes/arm/collision/arm_link_wr1.obj",
-    "spot/meshes/arm/visual/arm_link_el0.obj",
-    "spot/meshes/arm/visual/arm_link_el1_0.obj",
-    "spot/meshes/arm/visual/arm_link_el1_1.obj",
-    "spot/meshes/arm/visual/arm_link_sh0.obj",
-    "spot/meshes/arm/visual/arm_link_sh1_0.obj",
-    "spot/meshes/arm/visual/arm_link_sh1_1.obj",
-    "spot/meshes/arm/visual/arm_link_wr0_0.obj",
-    "spot/meshes/arm/visual/arm_link_wr0_1.obj",
-    "spot/meshes/arm/visual/arm_link_wr1_0.obj",
-    "spot/meshes/arm/visual/arm_link_wr1_1.obj",
-    "spot/meshes/base/collision/body_collision.obj",
-    "spot/meshes/base/collision/left_lower_leg_collision.obj",
-    "spot/meshes/base/collision/left_upper_leg_collision.obj",
-    "spot/meshes/base/collision/right_lower_leg_collision.obj",
-    "spot/meshes/base/collision/right_upper_leg_collision.obj",
-    "spot/meshes/base/visual/body_0.obj",
-    "spot/meshes/base/visual/body_1.obj",
-    "spot/meshes/base/visual/front_left_hip.obj",
-    "spot/meshes/base/visual/front_left_lower_leg.obj",
-    "spot/meshes/base/visual/front_left_upper_leg_0.obj",
-    "spot/meshes/base/visual/front_left_upper_leg_1.obj",
-    "spot/meshes/base/visual/front_right_hip.obj",
-    "spot/meshes/base/visual/front_right_lower_leg.obj",
-    "spot/meshes/base/visual/front_right_upper_leg_0.obj",
-    "spot/meshes/base/visual/front_right_upper_leg_1.obj",
-    "spot/meshes/base/visual/rear_left_hip.obj",
-    "spot/meshes/base/visual/rear_left_lower_leg.obj",
-    "spot/meshes/base/visual/rear_left_upper_leg_0.obj",
-    "spot/meshes/base/visual/rear_left_upper_leg_1.obj",
-    "spot/meshes/base/visual/rear_right_hip.obj",
-    "spot/meshes/base/visual/rear_right_lower_leg.obj",
-    "spot/meshes/base/visual/rear_right_upper_leg_0.obj",
-    "spot/meshes/base/visual/rear_right_upper_leg_1.obj",
-    "spot/meshes/gripper/collision/front_jaw.obj",
-    "spot/meshes/gripper/collision/jaw_tooth.obj",
-    "spot/meshes/gripper/collision/left_finger.obj",
-    "spot/meshes/gripper/collision/left_hinge.obj",
-    "spot/meshes/gripper/collision/left_tooth.obj",
-    "spot/meshes/gripper/collision/middle_jaw.obj",
-    "spot/meshes/gripper/collision/right_finger.obj",
-    "spot/meshes/gripper/collision/right_hinge.obj",
-    "spot/meshes/gripper/collision/right_tooth.obj",
-    "spot/meshes/gripper/visual/arm_link_fngr_0.obj",
-    "spot/meshes/gripper/visual/arm_link_fngr_1.obj",
-    "spot/spot_components/actuators_sensors.xml",
-    "spot/spot_components/arm.xml",
-    "spot/spot_components/assets.xml",
-    "spot/spot_components/cartire.xml",
-    "spot/spot_components/contact.xml",
-    "spot/spot_components/legs.xml",
-    "spot/spot_components/params_and_default.xml",
-    "spot/textures/bdaii_spot_wrap.png",
-    "spot/spot.xml"
-  ];
+    "stewart/scene.xml",
+    "stewart/stewart.xml",
+    "stewart/asset/10mm_ball.part",
+    "stewart/asset/10mm_ball.stl",
+    "stewart/asset/base_bot.part",
+    "stewart/asset/base_bot.stl",
+    "stewart/asset/base_side.part",
+    "stewart/asset/base_side.stl",
+    "stewart/asset/base_top.part",
+    "stewart/asset/base_top.stl",
+    "stewart/asset/injection_big_lens.part",
+    "stewart/asset/injection_big_lens.stl",
+    "stewart/asset/injection_small_lens.part",
+    "stewart/asset/injection_small_lens.stl",
+    "stewart/asset/large_lens_42mm.part",
+    "stewart/asset/large_lens_42mm.stl",
+    "stewart/asset/left_arm.part",
+    "stewart/asset/left_arm.stl",
+    "stewart/asset/magnet.part",
+    "stewart/asset/magnet.stl",
+    "stewart/asset/mp00663_neck_a2.part",
+    "stewart/asset/mp00663_neck_a2.stl",
+    "stewart/asset/mp00664_back_sheet_a3.part",
+    "stewart/asset/mp00664_back_sheet_a3.stl",
+    "stewart/asset/platform.part",
+    "stewart/asset/platform.stl",
+    "stewart/asset/pp00670_front_shell_a2.part",
+    "stewart/asset/pp00670_front_shell_a2.stl",
+    "stewart/asset/pp00671_monocle_a2.part",
+    "stewart/asset/pp00671_monocle_a2.stl",
+    "stewart/asset/pp00672_antenna_mic_a1.part",
+    "stewart/asset/pp00672_antenna_mic_a1.stl",
+    "stewart/asset/pp00673_antenna_sphere_a1.part",
+    "stewart/asset/pp00673_antenna_sphere_a1.stl",
+    "stewart/asset/right_arm.part",
+    "stewart/asset/right_arm.stl",
+    "stewart/asset/rod.part",
+    "stewart/asset/rod.stl",
+    "stewart/asset/simplified_xl330.part",
+    "stewart/asset/simplified_xl330.stl",
+    "stewart/asset/small_lens_30mm.part",
+    "stewart/asset/small_lens_30mm.stl",
+    "stewart/asset/std00609_ed_lens_m12.part",
+    "stewart/asset/std00609_ed_lens_m12.stl",
+    "empty.xml",];
 
   const requests = allFiles.map((url) => fetch(`${EXAMPLES_FOLDER}${url}`));
   const responses = await Promise.all(requests);
@@ -302,6 +248,7 @@ export const loadMujocoModule = async (): Promise<MujocoContainer> => {
     throw new Error("MuJoCo WASM module returned an invalid value.");
   }
 
+
   // Initialize the file system.
   mujocoModule.FS.mkdir(VIRTUAL_FILE_SYSTEM);
   mujocoModule.FS.mount(mujocoModule.MEMFS, { root: "." }, VIRTUAL_FILE_SYSTEM);
@@ -337,28 +284,72 @@ export const loadMujocoModule = async (): Promise<MujocoContainer> => {
  * @returns A promise that resolves when the scene has been successfully loaded.
  * @throws Throws an error if the scene fails to load or initialize.
  */
-export const loadMujocoScene = (mujocoContainer: MujocoContainer, sceneURl: string): void => {
+export const loadMujocoScene = async (
+  mujocoContainer: MujocoContainer,
+  sceneUrl: string
+): Promise<void> => {
+  console.log(`Loading scene: ${sceneUrl}`);
+
   const mujocoModule = mujocoContainer.getMujocoModule();
-  const simulation = mujocoContainer.getSimulation();
+  const vfsPath = `${VIRTUAL_FILE_SYSTEM}/${sceneUrl}`;
 
-  // Free the old simulation.
-  if (simulation != null) {
-    simulation.free();
+  // === 1) Hook runtime/thread errors ===
+  // Emscripten will call onRuntimeError/onThreadError on worker exceptions:
+  const attachHook = (name: 'onRuntimeError' | 'onThreadError') => {
+    const orig = (mujocoModule as any)[name];
+    (mujocoModule as any)[name] = (err: any) => {
+      console.error(`MuJoCo ${name}:`, err);
+      if (typeof orig === 'function') orig(err);
+    };
+  };
+  attachHook('onRuntimeError');
+  attachHook('onThreadError');
+
+  // === 2) Free old sim if any ===
+  const oldSim = mujocoContainer.getSimulation();
+  if (oldSim) {
+    oldSim.free();
   }
 
-  const newModel = new mujocoModule.Model(`${VIRTUAL_FILE_SYSTEM}/${sceneURl}`);
-  const newState = new mujocoModule.State(newModel);
-  const newSimulation = new mujocoModule.Simulation(newModel, newState);
+  // === 3) Try loading the new model ===
+  try {
+    const model = new mujocoModule.Model(vfsPath);
+    const state = new mujocoModule.State(model);
+    const sim = new mujocoModule.Simulation(model, state);
 
-  // Check for errors in the MuJoCo model.
-  if (newModel.getError() != "") {
-    throw new Error(`Could not load the model "${sceneURl}": ${newModel.getError()}`);
+    // Check MuJoCo‐level parse/compile errors:
+    const mjErr = model.getError();
+    if (mjErr) {
+      throw new Error(`MuJoCo parse error: ${mjErr}`);
+    }
+
+    mujocoContainer.setSimulation(sim);
+    console.log(`Successfully loaded the scene: ${sceneUrl}`);
+
+  } catch (err) {
+    console.error(`❌ Failed to load model "${sceneUrl}":`, err);
+
+    // Attempt to pull any lingering MuJoCo error string
+    try {
+      const checkModel = new mujocoModule.Model(vfsPath);
+      const lingering = checkModel.getError();
+      if (lingering) {
+        console.error(`  → MuJoCo.getError(): ${lingering}`);
+      }
+      checkModel.free();
+    } catch { /* ignore */ }
+
+    // Fetch the XML yourself to see status / small preview
+    try {
+      const resp = await fetch(vfsPath);
+      console.error(`  → HTTP ${resp.status} ${resp.statusText}`);
+      const txt = await resp.text();
+      console.error(`  → File preview:\n${txt.slice(0, 200)}${txt.length > 200 ? '…' : ''}`);
+    } catch (fetchErr) {
+      console.error(`  → Fetch error:`, fetchErr);
+    }
   }
-
-  mujocoContainer.setSimulation(newSimulation);
-  console.log(`Successfully loaded the scene: ${sceneURl}`);
 };
-
 
 
 /**
