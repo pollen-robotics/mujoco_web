@@ -19,7 +19,7 @@ import {
 import { UpdateProps } from "./UpdateProps";
 
 // —— Import only the types we need from the WASM typings ——
-// (These are “type only” imports: they do not become runtime code)
+// (These are "type only" imports: they do not become runtime code)
 import type { Model, Simulation } from "../wasm/mujoco_wasm";
 
 interface MujocoProps {
@@ -38,7 +38,7 @@ export const MujocoComponent: React.FC<MujocoProps> = ({ sceneUrl, onLoad }) => 
 
   const { scene } = useThree();
 
-  // Prevent stepping or rendering if we’re still loading
+  // Prevent stepping or rendering if we're still loading
   const loadingSceneRef = useRef<boolean>(false);
   const errorRef = useRef<boolean>(false);
 
@@ -73,7 +73,7 @@ export const MujocoComponent: React.FC<MujocoProps> = ({ sceneUrl, onLoad }) => 
     const setupMujocoScene = async () => {
       try {
         // 2.a. Load the MJCF file (this writes it into the virtual filesystem)
-        loadMujocoScene(mujocoContainer, sceneUrl);
+        await loadMujocoScene(mujocoContainer, sceneUrl);
 
         // 2.b. Build the Three.js objects (meshes, materials, etc.)
         updatePropsRef.current = await buildThreeScene(mujocoContainer, scene);
@@ -111,6 +111,32 @@ export const MujocoComponent: React.FC<MujocoProps> = ({ sceneUrl, onLoad }) => 
 
     const timeMS = clock.getElapsedTime() * 1000;
     const timestep = mdl.getOptions().timestep;
+
+    // ========= ADD SINUSOIDAL CONTROL HERE =========
+    // Get current time in seconds for sinusoidal motion
+    const currentTime = clock.getElapsedTime();
+
+    // Control all 8 actuators with sinusoidal motion
+    // for (let i = 0; i < mdl.nu; i++) {
+    for (let i = 0; i < 1; i++) {
+      // Different phase for each joint to create interesting motion
+      const phase = (i * Math.PI) / 4; // 45 degree phase shift between joints
+
+      // Sinusoidal motion: amplitude * sin(2π * frequency * time + phase)
+      const amplitude = 0.1;  // How far to move (adjust as needed)
+      const frequency = 0.5;  // How fast to oscillate (Hz)
+      const value = amplitude * Math.sin(2 * Math.PI * frequency * currentTime + phase);
+
+      // Set the control value for this actuator
+      sim.ctrl[i] = value;
+    }
+
+    // Special motion for antennas (last 2 joints) - make them move opposite to each other
+    if (mdl.nu >= 8) {
+      sim.ctrl[6] = 0.2 * Math.sin(2 * Math.PI * 1.0 * currentTime);
+      sim.ctrl[7] = -0.2 * Math.sin(2 * Math.PI * 1.0 * currentTime);
+    }
+    // ========= END OF SINUSOIDAL CONTROL =========
 
     // Clamp if too far behind
     if (timeMS - mujocoTimeRef.current > MAX_SIMULATION_LAG_MS) {
