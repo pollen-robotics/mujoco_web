@@ -19,6 +19,26 @@ dist-ssr
 /src/wasm/mujoco_wasm.wasm
 /src/wasm/mujoco_wasm.worker.mjs
 
+# WASM backup directory (from build.sh)
+wasm_backup/
+
+# Public assets directory (populated during build)
+public/
+
+# CMake build artifacts
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+external/
+
+# Package lock files
+package-lock.json
+pnpm-lock.yaml
+
+# TypeScript build info
+*.tsbuildinfo
+
 # Editor directories and files
 !.vscode/extensions.json
 .idea
