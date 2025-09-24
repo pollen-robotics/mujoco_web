@@ -47,6 +47,29 @@ export const MujocoComponent: React.FC<MujocoProps> = ({ sceneUrl, onLoad }) => 
   const updatePropsRef = useRef<UpdateProps>();
   const tmpVecRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
 
+  // Robot state from API
+  const robotStateRef = useRef<any>(null);
+  const lastFetchTime = useRef<number>(0);
+  const apiAvailable = useRef<boolean>(true);
+
+  // Function to fetch robot state from API
+  const fetchRobotState = async (): Promise<void> => {
+    try {
+      const response = await fetch("http://localhost:8000/api/state/full?with_head_joints=true&with_antenna_positions=true&with_body_yaw=true&with_head_pose=true");
+      if (response.ok) {
+        const state = await response.json();
+        robotStateRef.current = state;
+        apiAvailable.current = true;
+      } else {
+        console.warn("Failed to fetch robot state:", response.status);
+        apiAvailable.current = false;
+      }
+    } catch (error) {
+      console.warn("Error fetching robot state:", error);
+      apiAvailable.current = false;
+    }
+  };
+
   // Holds the wrapper that contains WASM Module, Model, State, Simulation
   const [mujocoContainer, setMujocoContainer] = useState<MujocoContainer | null>(null);
 
@@ -112,31 +135,38 @@ export const MujocoComponent: React.FC<MujocoProps> = ({ sceneUrl, onLoad }) => 
     const timeMS = clock.getElapsedTime() * 1000;
     const timestep = mdl.getOptions().timestep;
 
-    // ========= ADD SINUSOIDAL CONTROL HERE =========
-    // Get current time in seconds for sinusoidal motion
+    // ========= ROBOT API CONTROL =========
+    // Adaptive polling: 1Hz when API down, 10Hz when API up
     const currentTime = clock.getElapsedTime();
+    const pollInterval = apiAvailable.current ? 0.1 : 1.0; // 10Hz when up, 1Hz when down
 
-    // Control all 8 actuators with sinusoidal motion
-    // for (let i = 0; i < mdl.nu; i++) {
-    for (let i = 0; i < 1; i++) {
-      // Different phase for each joint to create interesting motion
-      const phase = (i * Math.PI) / 4; // 45 degree phase shift between joints
-
-      // Sinusoidal motion: amplitude * sin(2π * frequency * time + phase)
-      const amplitude = 0.1;  // How far to move (adjust as needed)
-      const frequency = 0.5;  // How fast to oscillate (Hz)
-      const value = amplitude * Math.sin(2 * Math.PI * frequency * currentTime + phase);
-
-      // Set the control value for this actuator
-      sim.ctrl[i] = value;
+    if (currentTime - lastFetchTime.current > pollInterval) {
+      fetchRobotState();
+      lastFetchTime.current = currentTime;
     }
 
-    // Special motion for antennas (last 2 joints) - make them move opposite to each other
-    if (mdl.nu >= 8) {
-      sim.ctrl[6] = 0.2 * Math.sin(2 * Math.PI * 1.0 * currentTime);
-      sim.ctrl[7] = -0.2 * Math.sin(2 * Math.PI * 1.0 * currentTime);
+    // Apply robot state to simulation if available
+    if (robotStateRef.current && robotStateRef.current.head_joints) {
+      const robotState = robotStateRef.current;
+
+      // Map head joints to simulation controls
+      for (let i = 0; i < Math.min(robotState.head_joints.length, mdl.nu - 2); i++) {
+        sim.ctrl[i] = robotState.head_joints[i];
+      }
+
+      // Map antenna positions to last 2 actuators if available
+      if (robotState.antennas_position && robotState.antennas_position.length >= 2 && mdl.nu >= 2) {
+        const antennaStartIdx = Math.max(0, mdl.nu - 2);
+        sim.ctrl[antennaStartIdx] = -robotState.antennas_position[1];     // Right antenna
+        sim.ctrl[antennaStartIdx + 1] = -robotState.antennas_position[0]; // Left antenna
+      }
+
+      // Add body_yaw
+      if (mdl.nu > 0) {
+        sim.ctrl[0] = robotState.body_yaw;
+      }
     }
-    // ========= END OF SINUSOIDAL CONTROL =========
+    // ========= END OF ROBOT API CONTROL =========
 
     // Clamp if too far behind
     if (timeMS - mujocoTimeRef.current > MAX_SIMULATION_LAG_MS) {
