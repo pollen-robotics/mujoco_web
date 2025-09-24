@@ -37,9 +37,7 @@ const App = () => {
             <OrbitControls makeDefault />
 
             {/* MuJoCo scene */}
-            {/* <Mujoco sceneUrl={"stewart/scene.xml"} /> */}
-            <Mujoco sceneUrl={"stewart/scene.xml"} />
-            {/* <Mujoco sceneUrl={"empty.xml"} /> */}
+            <Mujoco sceneUrl={"reachy/scenes/empty.xml"} />
 
             {/* post‐processing */}
             <EffectComposer>

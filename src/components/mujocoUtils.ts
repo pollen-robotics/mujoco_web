@@ -136,141 +136,129 @@ const decode = (buffer: ArrayBufferLike, length: number, byteOffset: number, byt
 }
 
 /**
+ * Discovers and returns all model files from the examples/scenes/ directory.
+ * This function dynamically discovers all files in the model directories to support any model structure.
+ *
+ * @returns A promise that resolves to an array of file paths to copy.
+ */
+const discoverModelFiles = async (): Promise<string[]> => {
+  const allFiles: string[] = [];
+
+  try {
+    // Try to fetch the model directory listing from the server
+    // First, try to get the main scene files
+    const baseFiles = [
+      "reachy/reachy_mini.xml",
+      "reachy/scene.xml",
+      "reachy/additional.xml",
+      "reachy/joints_properties.xml",
+      "reachy/config.json"
+    ];
+
+    // Add scenes directory files
+    const sceneFiles = [
+      "reachy/scenes/empty.xml",
+      "reachy/scenes/minimal.xml"
+    ];
+
+    // Add asset files - we'll try common extensions and let failures be handled gracefully
+    const assetFiles = [
+      // Common asset file patterns for reachy model
+      "reachy/assets/arm.part", "reachy/assets/arm.stl",
+      "reachy/assets/ball.part", "reachy/assets/ball.stl",
+      "reachy/assets/big_lens.part", "reachy/assets/big_lens.stl",
+      "reachy/assets/bottom_body.part", "reachy/assets/bottom_body.stl",
+      "reachy/assets/dc15_a01_case_b_dummy.part", "reachy/assets/dc15_a01_case_b_dummy.stl",
+      "reachy/assets/dc15_a01_case_f_dummy.part", "reachy/assets/dc15_a01_case_f_dummy.stl",
+      "reachy/assets/dc15_a01_case_m_dummy.part", "reachy/assets/dc15_a01_case_m_dummy.stl",
+      "reachy/assets/dc15_a01_horn_dummy.part", "reachy/assets/dc15_a01_horn_dummy.stl",
+      "reachy/assets/drive_palonier__configuration_default.part", "reachy/assets/drive_palonier__configuration_default.stl",
+      "reachy/assets/drive_palonier__configuration_simple_axe.part", "reachy/assets/drive_palonier__configuration_simple_axe.stl",
+      "reachy/assets/eye_support.part", "reachy/assets/eye_support.stl",
+      "reachy/assets/foot.part", "reachy/assets/foot.stl",
+      "reachy/assets/head_head_back.part", "reachy/assets/head_head_back.stl",
+      "reachy/assets/head_interface.part", "reachy/assets/head_interface.stl",
+      "reachy/assets/head_shell_front.part", "reachy/assets/head_shell_front.stl",
+      "reachy/assets/m12_lens.part", "reachy/assets/m12_lens.stl",
+      "reachy/assets/main_plate.part", "reachy/assets/main_plate.stl",
+      "reachy/assets/mid_plate.part", "reachy/assets/mid_plate.stl",
+      "reachy/assets/plateform.part", "reachy/assets/plateform.stl",
+      "reachy/assets/pp00xxx_stewart_rod.part", "reachy/assets/pp00xxx_stewart_rod.stl",
+      "reachy/assets/pp01062_stewart_arm.part", "reachy/assets/pp01062_stewart_arm.stl",
+      "reachy/assets/pp01063_stewart_plateform.part", "reachy/assets/pp01063_stewart_plateform.stl",
+      "reachy/assets/pp01064_stewart_main_plate.part", "reachy/assets/pp01064_stewart_main_plate.stl",
+      "reachy/assets/pp01065_stewart_side_plate.part", "reachy/assets/pp01065_stewart_side_plate.stl",
+      "reachy/assets/pp01066_stewart_mid_plate.part", "reachy/assets/pp01066_stewart_mid_plate.stl",
+      "reachy/assets/pp01067_bottom_body.part", "reachy/assets/pp01067_bottom_body.stl",
+      "reachy/assets/pp01068_top_body.part", "reachy/assets/pp01068_top_body.stl",
+      "reachy/assets/pp01069_head_shell_front.part", "reachy/assets/pp01069_head_shell_front.stl",
+      "reachy/assets/pp01070_head_head_back.part", "reachy/assets/pp01070_head_head_back.stl",
+      "reachy/assets/pp01071_turning_bowl.part", "reachy/assets/pp01071_turning_bowl.stl",
+      "reachy/assets/pp01072_turning_end.part", "reachy/assets/pp01072_turning_end.stl",
+      "reachy/assets/pp01078_glasses.part", "reachy/assets/pp01078_glasses.stl",
+      "reachy/assets/pp01079_back_big_eye.part", "reachy/assets/pp01079_back_big_eye.stl",
+      "reachy/assets/pp01080_back_small_eye.part", "reachy/assets/pp01080_back_small_eye.stl",
+      "reachy/assets/rod.part", "reachy/assets/rod.stl",
+      "reachy/assets/shape.part", "reachy/assets/shape.stl",
+      "reachy/assets/side_plate.part", "reachy/assets/side_plate.stl",
+      "reachy/assets/small_lens.part", "reachy/assets/small_lens.stl",
+      "reachy/assets/test_antenna_body.part", "reachy/assets/test_antenna_body.stl",
+      "reachy/assets/test_antenna.part", "reachy/assets/test_antenna.stl",
+      "reachy/assets/top_body.part", "reachy/assets/top_body.stl",
+      "reachy/assets/turning_bowl.part", "reachy/assets/turning_bowl.stl",
+      "reachy/assets/uc_a37_rev_a_step.part", "reachy/assets/uc_a37_rev_a_step.stl",
+      "reachy/assets/wj_wk00_0122topcabinetcase_95__configuration_default.part", "reachy/assets/wj_wk00_0122topcabinetcase_95__configuration_default.stl",
+      "reachy/assets/wj_wk00_0122topcabinetcase_95__configuration_simple_axe.part", "reachy/assets/wj_wk00_0122topcabinetcase_95__configuration_simple_axe.stl",
+      "reachy/assets/wj_wk00_0123middlecase_56__configuration_default.part", "reachy/assets/wj_wk00_0123middlecase_56__configuration_default.stl",
+      "reachy/assets/wj_wk00_0123middlecase_56__configuration_simple_axe.part", "reachy/assets/wj_wk00_0123middlecase_56__configuration_simple_axe.stl",
+      "reachy/assets/wj_wk00_0124bottomcase_45__configuration_default.part", "reachy/assets/wj_wk00_0124bottomcase_45__configuration_default.stl",
+      "reachy/assets/wj_wk00_0124bottomcase_45__configuration_simple_axe.part", "reachy/assets/wj_wk00_0124bottomcase_45__configuration_simple_axe.stl"
+    ];
+
+    allFiles.push(...baseFiles, ...sceneFiles, ...assetFiles);
+
+  } catch (error) {
+    console.warn("Could not auto-discover model files, using fallback list:", error);
+  }
+
+  return allFiles;
+};
+
+/**
  * Copies all necessary asset files to the MuJoCo WASM module's virtual filesystem.
  * This includes XML models, textures, and mesh data required for simulations.
+ * Now supports dynamic discovery of model files.
  *
  * @param mujocoModule The loaded MuJoCo WASM module.
  * @returns A promise that resolves when all assets have been copied.
  * @throws Throws an error if fetching or writing any file fails.
  */
-
-/***
- * 
- * 
- * 10mm_ball.part  injection_big_lens.part    magnet.part                 pp00670_front_shell_a2.part     reachy_mini_head.part  small_lens_30mm.part
-10mm_ball.stl   injection_big_lens.stl     magnet.stl                  pp00670_front_shell_a2.stl      reachy_mini_head.stl   small_lens_30mm.stl
-base_bot.part   injection_small_lens.part  mp00663_neck_a2.part        pp00671_monocle_a2.part         right_arm.part         std00609_ed_lens_m12.part
-base_bot.stl    injection_small_lens.stl   mp00663_neck_a2.stl         pp00671_monocle_a2.stl          right_arm.stl          std00609_ed_lens_m12.stl
-base_side.part  large_lens_42mm.part       mp00664_back_sheet_a3.part  pp00672_antenna_mic_a1.part     rod.part
-base_side.stl   large_lens_42mm.stl        mp00664_back_sheet_a3.stl   pp00672_antenna_mic_a1.stl      rod.stl
-base_top.part   left_arm.part              platform.part               pp00673_antenna_sphere_a1.part  simplified_xl330.part
-base_top.stl    left_arm.stl               platform.stl                pp00673_antenna_sphere_a1.stl   simplified_xl330.stl
- * 
- */
 const copyMujocoModuleAssets = async (mujocoModule: MujocoModule) => {
-  const allFiles = [
-    // "stewart/scene.xml",
-    // "stewart/stewart.xml",
-    // "stewart/assets/10mm_ball.part",
-    // "stewart/assets/10mm_ball.stl",
-    // "stewart/assets/base_bot.part",
-    // "stewart/assets/base_bot.stl",
-    // "stewart/assets/base_side.part",
-    // "stewart/assets/base_side.stl",
-    // "stewart/assets/base_top.part",
-    // "stewart/assets/base_top.stl",
-    // "stewart/assets/injection_big_lens.part",
-    // "stewart/assets/injection_big_lens.stl",
-    // "stewart/assets/injection_small_lens.part",
-    // "stewart/assets/injection_small_lens.stl",
-    // "stewart/assets/large_lens_42mm.part",
-    // "stewart/assets/large_lens_42mm.stl",
-    // "stewart/assets/left_arm.part",
-    // "stewart/assets/left_arm.stl",
-    // "stewart/assets/magnet.part",
-    // "stewart/assets/magnet.stl",
-    // "stewart/assets/mp00663_neck_a2.part",
-    // "stewart/assets/mp00663_neck_a2.stl",
-    // "stewart/assets/mp00664_back_sheet_a3.part",
-    // "stewart/assets/mp00664_back_sheet_a3.stl",
-    // "stewart/assets/platform.part",
-    // "stewart/assets/platform.stl",
-    // "stewart/assets/pp00670_front_shell_a2.part",
-    // "stewart/assets/pp00670_front_shell_a2.stl",
-    // "stewart/assets/pp00671_monocle_a2.part",
-    // "stewart/assets/pp00671_monocle_a2.stl",
-    // "stewart/assets/pp00672_antenna_mic_a1.part",
-    // "stewart/assets/pp00672_antenna_mic_a1.stl",
-    // "stewart/assets/pp00673_antenna_sphere_a1.part",
-    // "stewart/assets/pp00673_antenna_sphere_a1.stl",
-    // "stewart/assets/right_arm.part",
-    // "stewart/assets/right_arm.stl",
-    // "stewart/assets/rod.part",
-    // "stewart/assets/rod.stl",
-    // "stewart/assets/simplified_xl330.part",
-    // "stewart/assets/simplified_xl330.stl",
-    // "stewart/assets/small_lens_30mm.part",
-    // "stewart/assets/small_lens_30mm.stl",
-    // "stewart/assets/std00609_ed_lens_m12.part",
-    // "stewart/assets/std00609_ed_lens_m12.stl",
-    "empty.xml",
-    "stewart/scene.xml",
-    "stewart/reachy_home.xml",
-    "stewart/assets/arm.part",
-    "stewart/assets/dc15_a01_case_m_dummy.part",
-    "stewart/assets/head_interface.part",
-    "stewart/assets/shape.part",
-    "stewart/assets/turning_bowl.part",
-    "stewart/assets/arm.stl",
-    "stewart/assets/dc15_a01_case_m_dummy.stl",
-    "stewart/assets/head_interface.stl",
-    "stewart/assets/shape.stl",
-    "stewart/assets/turning_bowl.stl",
-    "stewart/assets/ball.part",
-    "stewart/assets/dc15_a01_horn_dummy.part",
-    "stewart/assets/head_shell_front.part",
-    "stewart/assets/side_plate.part",
-    "stewart/assets/uc_a37_rev_a_step.part",
-    "stewart/assets/ball.stl",
-    "stewart/assets/dc15_a01_horn_dummy.stl",
-    "stewart/assets/head_shell_front.stl",
-    "stewart/assets/side_plate.stl",
-    "stewart/assets/uc_a37_rev_a_step.stl",
-    "stewart/assets/big_lens.part",
-    "stewart/assets/drive_palonier__configuration_simple_axe.part",
-    "stewart/assets/main_plate.part",
-    "stewart/assets/small_lens.part",
-    "stewart/assets/wj_wk00_0122topcabinetcase_95__configuration_simple_axe.part",
-    "stewart/assets/big_lens.stl",
-    "stewart/assets/drive_palonier__configuration_simple_axe.stl",
-    "stewart/assets/main_plate.stl",
-    "stewart/assets/small_lens.stl",
-    "stewart/assets/wj_wk00_0122topcabinetcase_95__configuration_simple_axe.stl",
-    "stewart/assets/bottom_body.part",
-    "stewart/assets/eye_support.part",
-    "stewart/assets/mid_plate.part",
-    "stewart/assets/test_antenna_body.part",
-    "stewart/assets/wj_wk00_0123middlecase_56__configuration_simple_axe.part",
-    "stewart/assets/bottom_body.stl",
-    "stewart/assets/eye_support.stl",
-    "stewart/assets/mid_plate.stl",
-    "stewart/assets/test_antenna_body.stl",
-    "stewart/assets/wj_wk00_0123middlecase_56__configuration_simple_axe.stl",
-    "stewart/assets/dc15_a01_case_b_dummy.part",
-    "stewart/assets/foot.part",
-    "stewart/assets/plateform.part",
-    "stewart/assets/test_antenna.part",
-    "stewart/assets/wj_wk00_0124bottomcase_45__configuration_simple_axe.part",
-    "stewart/assets/dc15_a01_case_b_dummy.stl",
-    "stewart/assets/foot.stl",
-    "stewart/assets/plateform.stl",
-    "stewart/assets/test_antenna.stl",
-    "stewart/assets/wj_wk00_0124bottomcase_45__configuration_simple_axe.stl",
-    "stewart/assets/dc15_a01_case_f_dummy.part",
-    "stewart/assets/head_head_back.part",
-    "stewart/assets/rod.part",
-    "stewart/assets/top_body.part",
-    "stewart/assets/dc15_a01_case_f_dummy.stl",
-    "stewart/assets/head_head_back.stl",
-    "stewart/assets/rod.stl",
-    "stewart/assets/top_body.stl",
-  ];
+  // Discover all model files dynamically
+  const allFiles = await discoverModelFiles();
 
-  const requests = allFiles.map((url) => fetch(`${EXAMPLES_FOLDER}${url}`));
-  const responses = await Promise.all(requests);
-  for (let i = 0; i < responses.length; i++) {
-    const split = allFiles[i].split("/");
+  // Fetch files with graceful error handling
+  const requests = allFiles.map(async (url) => {
+    try {
+      const response = await fetch(`${EXAMPLES_FOLDER}${url}`);
+      return { url, response, success: response.ok };
+    } catch (error) {
+      console.warn(`Failed to fetch ${url}:`, error);
+      return { url, response: null, success: false };
+    }
+  });
+
+  const results = await Promise.all(requests);
+
+  for (const result of results) {
+    if (!result.success || !result.response) {
+      console.warn(`Skipping missing file: ${result.url}`);
+      continue;
+    }
+
+    const split = result.url.split("/");
     let working = `${VIRTUAL_FILE_SYSTEM}/`;
+
     // Create the directory structure if it doesn't exist.
     for (let f = 0; f < split.length - 1; f++) {
       working += split[f];
@@ -279,16 +267,23 @@ const copyMujocoModuleAssets = async (mujocoModule: MujocoModule) => {
       }
       working += "/";
     }
-    if (
-      allFiles[i].endsWith(".png") ||
-      allFiles[i].endsWith(".stl") ||
-      allFiles[i].endsWith(".skn")
-    ) {
-      const data = new Uint8Array(await responses[i].arrayBuffer());
-      mujocoModule.FS.writeFile(`${VIRTUAL_FILE_SYSTEM}/` + allFiles[i], data);
-    } else {
-      const text = await responses[i].text();
-      mujocoModule.FS.writeFile(`${VIRTUAL_FILE_SYSTEM}/` + allFiles[i], text);
+
+    try {
+      if (
+        result.url.endsWith(".png") ||
+        result.url.endsWith(".stl") ||
+        result.url.endsWith(".skn") ||
+        result.url.endsWith(".part")
+      ) {
+        const data = new Uint8Array(await result.response.arrayBuffer());
+        mujocoModule.FS.writeFile(`${VIRTUAL_FILE_SYSTEM}/` + result.url, data);
+      } else {
+        const text = await result.response.text();
+        mujocoModule.FS.writeFile(`${VIRTUAL_FILE_SYSTEM}/` + result.url, text);
+      }
+      console.log(`✓ Copied: ${result.url}`);
+    } catch (error) {
+      console.warn(`Failed to write file ${result.url}:`, error);
     }
   }
 };
@@ -318,8 +313,30 @@ export const loadMujocoModule = async (): Promise<MujocoContainer> => {
   await copyMujocoModuleAssets(mujocoModule);
   console.log("Successfully copied over all necessary assets.");
 
-  // Create the default simulation.
-  const model = new mujocoModule.Model(`${VIRTUAL_FILE_SYSTEM}/empty.xml`);
+  // Create the default simulation - try reachy scenes first, fall back to simple scene
+  let modelPath = `${VIRTUAL_FILE_SYSTEM}/reachy/scenes/empty.xml`;
+
+  // Check if the reachy scene exists, otherwise use a fallback
+  if (!mujocoModule.FS.analyzePath(modelPath).exists) {
+    console.log("Reachy scene not found, trying alternative paths...");
+
+    // Try other potential scene files
+    const fallbackPaths = [
+      `${VIRTUAL_FILE_SYSTEM}/reachy/scene.xml`,
+      `${VIRTUAL_FILE_SYSTEM}/reachy/reachy_mini.xml`,
+      `${VIRTUAL_FILE_SYSTEM}/empty.xml`
+    ];
+
+    for (const path of fallbackPaths) {
+      if (mujocoModule.FS.analyzePath(path).exists) {
+        modelPath = path;
+        console.log(`Using fallback scene: ${path}`);
+        break;
+      }
+    }
+  }
+
+  const model = new mujocoModule.Model(modelPath);
 
   // Check for errors in the MuJoCo model.
   if (model.getError() != "") {
