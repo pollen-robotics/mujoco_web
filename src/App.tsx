@@ -1,6 +1,6 @@
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { DepthOfField, EffectComposer } from "@react-three/postprocessing";
+// import { DepthOfField, EffectComposer } from "@react-three/postprocessing";
 import * as THREE from "three";
 import "./App.css";
 import { Mujoco } from "./components/Mujoco";
@@ -10,7 +10,7 @@ const App = () => {
     return (
         <Canvas
             tabIndex={-1}                                  // disable focus outline
-            shadows="soft"
+            shadows={false}  // Disabled to test triangle artifacts
             dpr={window.devicePixelRatio}
             onCreated={(state) => {
                 state.scene.background = new THREE.Color(0x264059);
@@ -25,13 +25,13 @@ const App = () => {
             }}
         >
             {/* lights + camera/controllers */}
-            <ambientLight color={0xffffff} intensity={0.1} />
+            <ambientLight color={0xffffff} intensity={0.5} />
             <spotLight
                 position={[0, 2, 2]}
                 angle={0.15}
                 penumbra={1}
                 decay={1}
-                intensity={3.14}
+                intensity={2.5}
             />
             <PerspectiveCamera makeDefault position={[2.0, 1.7, 1.7]} fov={45} />
             <OrbitControls makeDefault />
@@ -39,15 +39,15 @@ const App = () => {
             {/* MuJoCo scene */}
             <Mujoco sceneUrl={"reachy/scenes/empty.xml"} />
 
-            {/* post‐processing */}
-            <EffectComposer>
+            {/* post‐processing - DISABLED: causing blurry rendering */}
+            {/* <EffectComposer>
                 <DepthOfField
                     focusDistance={0}
                     focalLength={0.02}
                     bokehScale={2}
                     height={480}
                 />
-            </EffectComposer>
+            </EffectComposer> */}
         </Canvas>
     );
 };

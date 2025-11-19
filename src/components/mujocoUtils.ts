@@ -803,13 +803,19 @@ export const buildThreeScene = async (
       material.opacity != color[3] ||
       material.map != texture
     ) {
+      const isTransparent = color[3] < 1.0;
       material = new THREE.MeshPhysicalMaterial({
         color: new THREE.Color(color[0], color[1], color[2]),
-        transparent: color[3] < 1.0,
+        transparent: isTransparent,
         opacity: color[3],
+        depthWrite: !isTransparent, // Disable depth write for transparent objects
+        side: isTransparent ? THREE.DoubleSide : THREE.FrontSide, // Render both sides for transparent
+        polygonOffset: isTransparent, // Prevent z-fighting
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1,
         specularIntensity:
           model.geom_matid[g] != -1
-            ? model.mat_specular[model.geom_matid[g]] * 0.5
+            ? model.mat_specular[model.geom_matid[g]]
             : undefined,
         reflectivity:
           model.geom_matid[g] != -1
@@ -817,9 +823,9 @@ export const buildThreeScene = async (
             : undefined,
         roughness:
           model.geom_matid[g] != -1
-            ? 1.0 - model.mat_shininess[model.geom_matid[g]]
-            : undefined,
-        metalness: model.geom_matid[g] != -1 ? 0.1 : undefined,
+            ? Math.max(0.1, 1.0 - model.mat_shininess[model.geom_matid[g]])
+            : 0.5,
+        metalness: model.geom_matid[g] != -1 ? 0.0 : undefined,
         map: texture
       });
     }
@@ -833,8 +839,10 @@ export const buildThreeScene = async (
       mesh = new THREE.Mesh(geometry, material);
     }
 
-    mesh.castShadow = g == 0 ? false : true;
-    mesh.receiveShadow = type != 7;
+    // Disable shadows for transparent objects to prevent triangle artifacts
+    const isObjTransparent = color[3] < 1.0;
+    mesh.castShadow = g == 0 || isObjTransparent ? false : true;
+    mesh.receiveShadow = type != 7 && !isObjTransparent;
     mesh.bodyID = b;
     bodies[b].add(mesh);
     getPosition(model.geom_pos, g, mesh.position);
@@ -882,11 +890,11 @@ export const buildThreeScene = async (
       light.decay = model.light_attenuation[l] * 100;
       light.penumbra = 0.5;
     }
-    light.castShadow = true; // default false
-    light.shadow.mapSize.width = 1024; // default
-    light.shadow.mapSize.height = 1024; // default
-    light.shadow.camera.near = 1; // default
-    light.shadow.camera.far = 10; // default
+    light.castShadow = false; // Disabled to prevent artifacts
+    // light.shadow.mapSize.width = 1024; // default
+    // light.shadow.mapSize.height = 1024; // default
+    // light.shadow.camera.near = 1; // default
+    // light.shadow.camera.far = 10; // default
     //bodies[model.light_bodyid()].add(light);
     if (bodies[0]) {
       bodies[0].add(light);
