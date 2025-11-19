@@ -158,61 +158,72 @@ const discoverModelFiles = async (): Promise<string[]> => {
     // Add scenes directory files
     const sceneFiles = [
       "reachy/scenes/empty.xml",
-      "reachy/scenes/minimal.xml"
+      "reachy/scenes/minimal.xml",
+      // "reachy/scenes/test_minimal.xml"
     ];
 
-    // Add asset files - we'll try common extensions and let failures be handled gracefully
+    // Add asset files - current asset list matching mjcf/assets directory
     const assetFiles = [
-      // Common asset file patterns for reachy model
-      "reachy/assets/arm.part", "reachy/assets/arm.stl",
-      "reachy/assets/ball.part", "reachy/assets/ball.stl",
-      "reachy/assets/big_lens.part", "reachy/assets/big_lens.stl",
-      "reachy/assets/bottom_body.part", "reachy/assets/bottom_body.stl",
+      // Current asset file patterns for reachy model
+      "reachy/assets/5w_speaker.part", "reachy/assets/5w_speaker.stl",
+      "reachy/assets/antenna.part", "reachy/assets/antenna.stl",
+      "reachy/assets/antenna_body_3dprint.part", "reachy/assets/antenna_body_3dprint.stl",
+      "reachy/assets/antenna_holder_l_3dprint.part", "reachy/assets/antenna_holder_l_3dprint.stl",
+      "reachy/assets/antenna_holder_r_3dprint.part", "reachy/assets/antenna_holder_r_3dprint.stl",
+      "reachy/assets/antenna_interface_3dprint.part", "reachy/assets/antenna_interface_3dprint.stl",
+      "reachy/assets/arducam.part", "reachy/assets/arducam.stl",
+      "reachy/assets/b3b_eh.part", "reachy/assets/b3b_eh.stl",
+      "reachy/assets/b3b_eh_1.part", "reachy/assets/b3b_eh_1.stl",
+      "reachy/assets/bearing_85x110x13.part", "reachy/assets/bearing_85x110x13.stl",
+      "reachy/assets/big_lens_d40.part", "reachy/assets/big_lens_d40.stl",
+      "reachy/assets/body_down_3dprint.part", "reachy/assets/body_down_3dprint.stl",
+      "reachy/assets/body_foot_3dprint.part", "reachy/assets/body_foot_3dprint.stl",
+      "reachy/assets/body_top_3dprint.part", "reachy/assets/body_top_3dprint.stl",
+      "reachy/assets/body_turning_3dprint.part", "reachy/assets/body_turning_3dprint.stl",
+      "reachy/assets/bts2_m2_6x8.part", "reachy/assets/bts2_m2_6x8.stl",
       "reachy/assets/dc15_a01_case_b_dummy.part", "reachy/assets/dc15_a01_case_b_dummy.stl",
       "reachy/assets/dc15_a01_case_f_dummy.part", "reachy/assets/dc15_a01_case_f_dummy.stl",
       "reachy/assets/dc15_a01_case_m_dummy.part", "reachy/assets/dc15_a01_case_m_dummy.stl",
       "reachy/assets/dc15_a01_horn_dummy.part", "reachy/assets/dc15_a01_horn_dummy.stl",
-      "reachy/assets/drive_palonier__configuration_default.part", "reachy/assets/drive_palonier__configuration_default.stl",
-      "reachy/assets/drive_palonier__configuration_simple_axe.part", "reachy/assets/drive_palonier__configuration_simple_axe.stl",
-      "reachy/assets/eye_support.part", "reachy/assets/eye_support.stl",
-      "reachy/assets/foot.part", "reachy/assets/foot.stl",
-      "reachy/assets/head_head_back.part", "reachy/assets/head_head_back.stl",
-      "reachy/assets/head_interface.part", "reachy/assets/head_interface.stl",
-      "reachy/assets/head_shell_front.part", "reachy/assets/head_shell_front.stl",
-      "reachy/assets/m12_lens.part", "reachy/assets/m12_lens.stl",
-      "reachy/assets/main_plate.part", "reachy/assets/main_plate.stl",
-      "reachy/assets/mid_plate.part", "reachy/assets/mid_plate.stl",
-      "reachy/assets/plateform.part", "reachy/assets/plateform.stl",
-      "reachy/assets/pp00xxx_stewart_rod.part", "reachy/assets/pp00xxx_stewart_rod.stl",
-      "reachy/assets/pp01062_stewart_arm.part", "reachy/assets/pp01062_stewart_arm.stl",
-      "reachy/assets/pp01063_stewart_plateform.part", "reachy/assets/pp01063_stewart_plateform.stl",
-      "reachy/assets/pp01064_stewart_main_plate.part", "reachy/assets/pp01064_stewart_main_plate.stl",
-      "reachy/assets/pp01065_stewart_side_plate.part", "reachy/assets/pp01065_stewart_side_plate.stl",
-      "reachy/assets/pp01066_stewart_mid_plate.part", "reachy/assets/pp01066_stewart_mid_plate.stl",
-      "reachy/assets/pp01067_bottom_body.part", "reachy/assets/pp01067_bottom_body.stl",
-      "reachy/assets/pp01068_top_body.part", "reachy/assets/pp01068_top_body.stl",
-      "reachy/assets/pp01069_head_shell_front.part", "reachy/assets/pp01069_head_shell_front.stl",
-      "reachy/assets/pp01070_head_head_back.part", "reachy/assets/pp01070_head_head_back.stl",
-      "reachy/assets/pp01071_turning_bowl.part", "reachy/assets/pp01071_turning_bowl.stl",
-      "reachy/assets/pp01072_turning_end.part", "reachy/assets/pp01072_turning_end.stl",
-      "reachy/assets/pp01078_glasses.part", "reachy/assets/pp01078_glasses.stl",
-      "reachy/assets/pp01079_back_big_eye.part", "reachy/assets/pp01079_back_big_eye.stl",
-      "reachy/assets/pp01080_back_small_eye.part", "reachy/assets/pp01080_back_small_eye.stl",
-      "reachy/assets/rod.part", "reachy/assets/rod.stl",
-      "reachy/assets/shape.part", "reachy/assets/shape.stl",
-      "reachy/assets/side_plate.part", "reachy/assets/side_plate.stl",
-      "reachy/assets/small_lens.part", "reachy/assets/small_lens.stl",
-      "reachy/assets/test_antenna_body.part", "reachy/assets/test_antenna_body.stl",
-      "reachy/assets/test_antenna.part", "reachy/assets/test_antenna.stl",
-      "reachy/assets/top_body.part", "reachy/assets/top_body.stl",
-      "reachy/assets/turning_bowl.part", "reachy/assets/turning_bowl.stl",
-      "reachy/assets/uc_a37_rev_a_step.part", "reachy/assets/uc_a37_rev_a_step.stl",
-      "reachy/assets/wj_wk00_0122topcabinetcase_95__configuration_default.part", "reachy/assets/wj_wk00_0122topcabinetcase_95__configuration_default.stl",
-      "reachy/assets/wj_wk00_0122topcabinetcase_95__configuration_simple_axe.part", "reachy/assets/wj_wk00_0122topcabinetcase_95__configuration_simple_axe.stl",
-      "reachy/assets/wj_wk00_0123middlecase_56__configuration_default.part", "reachy/assets/wj_wk00_0123middlecase_56__configuration_default.stl",
-      "reachy/assets/wj_wk00_0123middlecase_56__configuration_simple_axe.part", "reachy/assets/wj_wk00_0123middlecase_56__configuration_simple_axe.stl",
-      "reachy/assets/wj_wk00_0124bottomcase_45__configuration_default.part", "reachy/assets/wj_wk00_0124bottomcase_45__configuration_default.stl",
-      "reachy/assets/wj_wk00_0124bottomcase_45__configuration_simple_axe.part", "reachy/assets/wj_wk00_0124bottomcase_45__configuration_simple_axe.stl"
+      "reachy/assets/dc15_a01_led_cap2_dummy.part", "reachy/assets/dc15_a01_led_cap2_dummy.stl",
+      "reachy/assets/glasses_dolder_3dprint.part", "reachy/assets/glasses_dolder_3dprint.stl",
+      "reachy/assets/head_back_3dprint.part", "reachy/assets/head_back_3dprint.stl",
+      "reachy/assets/head_front_3dprint.part", "reachy/assets/head_front_3dprint.stl",
+      "reachy/assets/head_mic_3dprint.part", "reachy/assets/head_mic_3dprint.stl",
+      "reachy/assets/lens_cap_d30_3dprint.part", "reachy/assets/lens_cap_d30_3dprint.stl",
+      "reachy/assets/lens_cap_d40_3dprint.part", "reachy/assets/lens_cap_d40_3dprint.stl",
+      "reachy/assets/m12_fisheye_lens_1_8mm.part", "reachy/assets/m12_fisheye_lens_1_8mm.stl",
+      "reachy/assets/mp01062_stewart_arm_3.part", "reachy/assets/mp01062_stewart_arm_3.stl",
+      "reachy/assets/neck_reference_3dprint.part", "reachy/assets/neck_reference_3dprint.stl",
+      "reachy/assets/phs_1_7x20_5_dc10.part", "reachy/assets/phs_1_7x20_5_dc10.stl",
+      "reachy/assets/phs_1_7x20_5_dc10_1.part", "reachy/assets/phs_1_7x20_5_dc10_1.stl",
+      "reachy/assets/phs_1_7x20_5_dc10_2.part", "reachy/assets/phs_1_7x20_5_dc10_2.stl",
+      "reachy/assets/phs_1_7x20_5_dc10_3.part", "reachy/assets/phs_1_7x20_5_dc10_3.stl",
+      "reachy/assets/pp01102_arducam_carter.part", "reachy/assets/pp01102_arducam_carter.stl",
+      "reachy/assets/small_lens_d30.part", "reachy/assets/small_lens_d30.stl",
+      "reachy/assets/stewart_link_ball.part", "reachy/assets/stewart_link_ball.stl",
+      "reachy/assets/stewart_link_ball__2.part", "reachy/assets/stewart_link_ball__2.stl",
+      "reachy/assets/stewart_link_rod.part", "reachy/assets/stewart_link_rod.stl",
+      "reachy/assets/stewart_main_plate_3dprint.part", "reachy/assets/stewart_main_plate_3dprint.stl",
+      "reachy/assets/stewart_tricap_3dprint.part", "reachy/assets/stewart_tricap_3dprint.stl",
+
+      // Collision meshes (used in reachy_mini.xml)
+      "reachy/assets/collision/coarse/head_one_3dprint_collider_0.stl",
+      "reachy/assets/collision/coarse/body_top_3dprint_collider_front_0.stl",
+      "reachy/assets/collision/coarse/body_top_3dprint_collider_front_1.stl",
+      "reachy/assets/collision/coarse/body_top_3dprint_collider_front_2.stl",
+      "reachy/assets/collision/coarse/body_top_3dprint_collider_back_0.stl",
+      "reachy/assets/collision/coarse/body_top_3dprint_collider_back_1.stl",
+      "reachy/assets/collision/coarse/body_top_3dprint_collider_back_2.stl",
+      "reachy/assets/collision/coarse/body_top_3dprint_collider_back_3.stl",
+      "reachy/assets/collision/fine/head_one_3dprint_collider_0.stl",
+      "reachy/assets/collision/fine/body_top_3dprint_collider_front_0.stl",
+      "reachy/assets/collision/fine/body_top_3dprint_collider_front_1.stl",
+      "reachy/assets/collision/fine/body_top_3dprint_collider_front_2.stl",
+      "reachy/assets/collision/fine/body_top_3dprint_collider_back_0.stl",
+      "reachy/assets/collision/fine/body_top_3dprint_collider_back_1.stl",
+      "reachy/assets/collision/fine/body_top_3dprint_collider_back_2.stl",
+      "reachy/assets/collision/fine/body_top_3dprint_collider_back_3.stl"
     ];
 
     allFiles.push(...baseFiles, ...sceneFiles, ...assetFiles);
@@ -237,22 +248,45 @@ const copyMujocoModuleAssets = async (mujocoModule: MujocoModule) => {
   // Discover all model files dynamically
   const allFiles = await discoverModelFiles();
 
-  // Fetch files with graceful error handling
+  // Fetch files with detailed error handling and logging
+  console.log('=== MuJoCo Asset Loading ===');
+  console.log(`Total files to load: ${allFiles.length}`);
+
   const requests = allFiles.map(async (url) => {
+    const fullUrl = `${EXAMPLES_FOLDER}${url}`;
     try {
-      const response = await fetch(`${EXAMPLES_FOLDER}${url}`);
-      return { url, response, success: response.ok };
+      console.log(`[FETCH] Attempting to load: ${fullUrl}`);
+      const response = await fetch(fullUrl);
+
+      if (response.ok) {
+        console.log(`[SUCCESS] Loaded: ${url} (${response.status} ${response.statusText})`);
+        return { url, response, success: true };
+      } else {
+        console.error(`[FAILED] ${url} - HTTP ${response.status} ${response.statusText}`);
+        return { url, response, success: false };
+      }
     } catch (error) {
-      console.warn(`Failed to fetch ${url}:`, error);
+      console.error(`[ERROR] Failed to fetch ${url}:`, error);
       return { url, response: null, success: false };
     }
   });
 
   const results = await Promise.all(requests);
 
+  // Summary of results
+  const successful = results.filter(r => r.success).length;
+  const failed = results.filter(r => !r.success).length;
+  console.log(`=== Loading Summary ===`);
+  console.log(`✓ Successful: ${successful}/${allFiles.length}`);
+  console.log(`✗ Failed: ${failed}/${allFiles.length}`);
+
+  console.log(`=== Writing Files to Virtual FS ===`);
+  let writtenCount = 0;
+  let writeErrors = 0;
+
   for (const result of results) {
     if (!result.success || !result.response) {
-      console.warn(`Skipping missing file: ${result.url}`);
+      console.warn(`[SKIP] Missing file: ${result.url}`);
       continue;
     }
 
@@ -263,29 +297,59 @@ const copyMujocoModuleAssets = async (mujocoModule: MujocoModule) => {
     for (let f = 0; f < split.length - 1; f++) {
       working += split[f];
       if (!mujocoModule.FS.analyzePath(working).exists) {
+        console.log(`[MKDIR] Creating directory: ${working}`);
         mujocoModule.FS.mkdir(working);
       }
       working += "/";
     }
 
     try {
+      const vfsPath = `${VIRTUAL_FILE_SYSTEM}/` + result.url;
+
       if (
         result.url.endsWith(".png") ||
         result.url.endsWith(".stl") ||
         result.url.endsWith(".skn") ||
-        result.url.endsWith(".part")
+        result.url.endsWith(".part") ||
+        result.url.endsWith(".obj")
       ) {
         const data = new Uint8Array(await result.response.arrayBuffer());
-        mujocoModule.FS.writeFile(`${VIRTUAL_FILE_SYSTEM}/` + result.url, data);
+
+        // Check for empty or suspiciously small files
+        if (data.length === 0) {
+          console.error(`[WRITE ERROR] Empty file: ${result.url}`);
+          writeErrors++;
+          continue;
+        }
+        if (data.length < 100 && result.url.endsWith(".stl")) {
+          console.warn(`[WRITE WARNING] STL file is very small (${data.length} bytes): ${result.url}`);
+        }
+
+        mujocoModule.FS.writeFile(vfsPath, data);
+        console.log(`[WRITE] Binary file: ${result.url} (${data.length} bytes)`);
       } else {
         const text = await result.response.text();
-        mujocoModule.FS.writeFile(`${VIRTUAL_FILE_SYSTEM}/` + result.url, text);
+
+        // Check for empty text files
+        if (text.length === 0) {
+          console.error(`[WRITE ERROR] Empty file: ${result.url}`);
+          writeErrors++;
+          continue;
+        }
+
+        mujocoModule.FS.writeFile(vfsPath, text);
+        console.log(`[WRITE] Text file: ${result.url} (${text.length} chars)`);
       }
-      console.log(`✓ Copied: ${result.url}`);
+      writtenCount++;
     } catch (error) {
-      console.warn(`Failed to write file ${result.url}:`, error);
+      console.error(`[WRITE ERROR] Failed to write ${result.url}:`, error);
+      writeErrors++;
     }
   }
+
+  console.log(`=== Virtual FS Write Summary ===`);
+  console.log(`✓ Written: ${writtenCount} files`);
+  console.log(`✗ Errors: ${writeErrors} files`);
 };
 
 /**
@@ -313,11 +377,17 @@ export const loadMujocoModule = async (): Promise<MujocoContainer> => {
   await copyMujocoModuleAssets(mujocoModule);
   console.log("Successfully copied over all necessary assets.");
 
-  // Create the default simulation - try reachy scenes first, fall back to simple scene
+  // Create the default simulation - try test scene first
+  console.log("=== Creating Default Simulation ===");
+  // let modelPath = `${VIRTUAL_FILE_SYSTEM}/reachy/scenes/test_minimal.xml`;
   let modelPath = `${VIRTUAL_FILE_SYSTEM}/reachy/scenes/empty.xml`;
 
   // Check if the reachy scene exists, otherwise use a fallback
-  if (!mujocoModule.FS.analyzePath(modelPath).exists) {
+  console.log(`Checking for scene at: ${modelPath}`);
+  const pathExists = mujocoModule.FS.analyzePath(modelPath).exists;
+  console.log(`Scene exists: ${pathExists}`);
+
+  if (!pathExists) {
     console.log("Reachy scene not found, trying alternative paths...");
 
     // Try other potential scene files
@@ -336,18 +406,76 @@ export const loadMujocoModule = async (): Promise<MujocoContainer> => {
     }
   }
 
-  const model = new mujocoModule.Model(modelPath);
+  console.log(`Final model path: ${modelPath}`);
 
-  // Check for errors in the MuJoCo model.
-  if (model.getError() != "") {
-    throw new Error(`Could not load the default model: ${model.getError()}`);
+  // Simple VFS check
+  console.log("=== Checking VFS Contents ===");
+  try {
+    const reachyExists = mujocoModule.FS.analyzePath(`${VIRTUAL_FILE_SYSTEM}/reachy`).exists;
+    const scenesExists = mujocoModule.FS.analyzePath(`${VIRTUAL_FILE_SYSTEM}/reachy/scenes`).exists;
+    const assetsExists = mujocoModule.FS.analyzePath(`${VIRTUAL_FILE_SYSTEM}/reachy/assets`).exists;
+
+    console.log(`VFS Check: reachy=${reachyExists}, scenes=${scenesExists}, assets=${assetsExists}`);
+
+    if (assetsExists) {
+      const assetFiles = mujocoModule.FS.readdir(`${VIRTUAL_FILE_SYSTEM}/reachy/assets`);
+      console.log(`Asset files count: ${assetFiles.length - 2}`); // -2 for . and ..
+      console.log(`First 10 assets:`, assetFiles.slice(2, 12));
+    }
+  } catch (e) {
+    console.error("VFS check failed:", e);
   }
 
-  const state = new mujocoModule.State(model);
-  const simulation = new mujocoModule.Simulation(model, state);
-  console.log("Successfully created the default simulation.");
+  console.log(`=== Loading MuJoCo Model (Initial) ===`);
+  console.log(`Creating model from: ${modelPath}`);
 
-  return new MujocoContainer(mujocoModule, simulation);
+  try {
+    const model = new mujocoModule.Model(modelPath);
+
+    // Check for errors in the MuJoCo model.
+    const error = model.getError();
+    console.log(`Model error check: "${error}"`);
+
+    if (error != "") {
+      console.error(`❌ MuJoCo model error: ${error}`);
+      throw new Error(`Could not load the default model: ${error}`);
+    }
+
+    console.log("✅ Model created successfully");
+    console.log("Creating state...");
+    const state = new mujocoModule.State(model);
+
+    console.log("Creating simulation...");
+    const simulation = new mujocoModule.Simulation(model, state);
+
+    console.log("✅ Successfully created the default simulation.");
+    return new MujocoContainer(mujocoModule, simulation);
+
+  } catch (error) {
+    console.error("❌ Failed to create initial model:");
+    console.error("Raw error:", error);
+    console.error("Error type:", typeof error);
+    console.error("Error constructor:", error?.constructor?.name);
+
+    // Try to extract any useful information
+    if (error && typeof error === 'object') {
+      console.error("Error keys:", Object.keys(error));
+      console.error("Error values:", Object.values(error));
+      console.error("Error toString():", error.toString?.());
+    }
+
+    // Try to get the error from MuJoCo's internal state
+    try {
+      // Check if there's a global error state
+      if ((mujocoModule as any).getLastError) {
+        console.error("MuJoCo last error:", (mujocoModule as any).getLastError());
+      }
+    } catch (e) {
+      console.error("Could not get MuJoCo error:", e);
+    }
+
+    throw new Error(`Failed to load model: ${error}`);
+  }
 };
 
 /**
@@ -390,22 +518,62 @@ export const loadMujocoScene = async (
   }
 
   // === 3) Try loading the new model ===
-  try {
-    const model = new mujocoModule.Model(vfsPath);
-    const state = new mujocoModule.State(model);
-    const sim = new mujocoModule.Simulation(model, state);
+  console.log(`=== Loading MuJoCo Model ===`);
+  console.log(`VFS Path: ${vfsPath}`);
 
-    // Check MuJoCo‐level parse/compile errors:
+  // Check if the file exists in VFS
+  try {
+    const pathInfo = mujocoModule.FS.analyzePath(vfsPath);
+    console.log(`VFS File Check:`, {
+      exists: pathInfo.exists,
+      isRoot: pathInfo.isRoot,
+      error: pathInfo.error
+    });
+
+    if (!pathInfo.exists) {
+      console.error(`❌ File does not exist in VFS: ${vfsPath}`);
+      // List what's in the VFS
+      try {
+        const vfsDir = vfsPath.substring(0, vfsPath.lastIndexOf('/'));
+        console.log(`Listing VFS directory: ${vfsDir}`);
+        const files = mujocoModule.FS.readdir(vfsDir);
+        console.log(`Files in directory:`, files);
+      } catch (e) {
+        console.error(`Failed to list VFS directory:`, e);
+      }
+      return;
+    }
+  } catch (err) {
+    console.error(`Error checking VFS path:`, err);
+  }
+
+  try {
+    console.log(`Creating MuJoCo model from: ${vfsPath}`);
+    const model = new mujocoModule.Model(vfsPath);
+
+    // Check MuJoCo‐level parse/compile errors immediately
     const mjErr = model.getError();
     if (mjErr) {
+      console.error(`❌ MuJoCo compile error: ${mjErr}`);
       throw new Error(`MuJoCo parse error: ${mjErr}`);
     }
 
+    console.log(`Creating state...`);
+    const state = new mujocoModule.State(model);
+
+    console.log(`Creating simulation...`);
+    const sim = new mujocoModule.Simulation(model, state);
+
     mujocoContainer.setSimulation(sim);
-    console.log(`Successfully loaded the scene: ${sceneUrl}`);
+    console.log(`✅ Successfully loaded the scene: ${sceneUrl}`);
 
   } catch (err) {
     console.error(`❌ Failed to load model "${sceneUrl}":`, err);
+    console.error(`Full error:`, {
+      name: (err as Error).name,
+      message: (err as Error).message,
+      stack: (err as Error).stack
+    });
 
     // Attempt to pull any lingering MuJoCo error string
     try {
@@ -415,16 +583,16 @@ export const loadMujocoScene = async (
         console.error(`  → MuJoCo.getError(): ${lingering}`);
       }
       checkModel.free();
-    } catch { /* ignore */ }
+    } catch (e) {
+      console.error(`  → Error getting MuJoCo error:`, e);
+    }
 
-    // Fetch the XML yourself to see status / small preview
+    // Try to read the XML file from VFS to verify it's there
     try {
-      const resp = await fetch(vfsPath);
-      console.error(`  → HTTP ${resp.status} ${resp.statusText}`);
-      const txt = await resp.text();
-      console.error(`  → File preview:\n${txt.slice(0, 200)}${txt.length > 200 ? '…' : ''}`);
-    } catch (fetchErr) {
-      console.error(`  → Fetch error:`, fetchErr);
+      const content = mujocoModule.FS.readFile(vfsPath, { encoding: 'utf8' });
+      console.log(`  → VFS file content (first 500 chars):\n${content.slice(0, 500)}`);
+    } catch (readErr) {
+      console.error(`  → Failed to read file from VFS:`, readErr);
     }
   }
 };
